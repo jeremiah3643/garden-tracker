@@ -1,0 +1,5 @@
+/GardenTrackerApi/bin/
+/GardenTrackerApi/obj/
+/GardenTrackerApi/garden.db
+/GardenTrackerClient/node_modules/
+/GardenTrackerClient/dist/
