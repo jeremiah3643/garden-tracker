@@ -1,0 +1,6 @@
+@GardenTrackerApi_HostAddress = http://localhost:5204
+
+GET {{GardenTrackerApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
