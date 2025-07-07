@@ -3,3 +3,5 @@
 /GardenTrackerApi/garden.db
 /GardenTrackerClient/node_modules/
 /GardenTrackerClient/dist/
+
+.fake
