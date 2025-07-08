@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 using GardenTrackerApi.Data;
 using GardenTrackerApi.Models;
+using Npgsql
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -16,24 +17,28 @@ builder.Services.AddControllers()
 builder.Services.AddDbContext<GardenContext>(options =>
 {
     var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
-    Console.WriteLine($"DATABASE_URL: '{connectionString}'"); // Enhanced debug
+    Console.WriteLine($"DATABASE_URL: '{connectionString ?? "null"}'");
     if (string.IsNullOrEmpty(connectionString))
     {
-        Console.WriteLine("DATABASE_URL not found, using local fallback.");
-        connectionString = "Host=localhost;Database=gardentrackerdb;Username=postgres;Password=yourpassword";
+        connectionString = "Host=localhost;Database=gardentrackerdb;Username=postgres;Password=yourpassword"; // Local fallback
     }
     else
     {
-        Console.WriteLine("Using Render DATABASE_URL.");
+        Console.WriteLine("Using Neon DATABASE_URL.");
     }
     try
     {
-        options.UseNpgsql(connectionString);
+        var npgsqlBuilder = new NpgsqlConnectionStringBuilder(connectionString)
+        {
+            SslMode = SslMode.Require, // Neon requires SSL
+            TrustServerCertificate = true // For local testing with self-signed certs
+        };
+        options.UseNpgsql(npgsqlBuilder.ToString());
     }
     catch (Exception ex)
     {
         Console.WriteLine($"Npgsql configuration error: {ex.Message}");
-        throw; // Re-throw to stop the app and log the failure
+        throw;
     }
 });
 builder.Services.AddEndpointsApiExplorer();
