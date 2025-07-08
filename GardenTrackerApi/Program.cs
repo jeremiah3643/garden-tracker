@@ -14,8 +14,10 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
+//builder.Services.AddDbContext<GardenContext>(options =>
+//    options.UseSqlite("Data Source=garden.db"));
 builder.Services.AddDbContext<GardenContext>(options =>
-    options.UseSqlite("Data Source=garden.db"));
+    options.UseNpgsql(Environment.GetEnvironmentVariable("DATABASE_URL") ?? "Host=localhost;Database=gardentrackerdb;Username=postgres;Password=091690"));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
