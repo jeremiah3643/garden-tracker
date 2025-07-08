@@ -8,32 +8,42 @@ using Microsoft.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
-//builder.Services.AddDbContext<GardenContext>(options =>
-//    options.UseSqlite("Data Source=garden.db"));
 builder.Services.AddDbContext<GardenContext>(options =>
 {
     var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
+    Console.WriteLine($"DATABASE_URL: '{connectionString}'"); // Enhanced debug
     if (string.IsNullOrEmpty(connectionString))
     {
+        Console.WriteLine("DATABASE_URL not found, using local fallback.");
         connectionString = "Host=localhost;Database=gardentrackerdb;Username=postgres;Password=yourpassword";
     }
-    options.UseNpgsql(connectionString);
+    else
+    {
+        Console.WriteLine("Using Render DATABASE_URL.");
+    }
+    try
+    {
+        options.UseNpgsql(connectionString);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Npgsql configuration error: {ex.Message}");
+        throw; // Re-throw to stop the app and log the failure
+    }
 });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Enable CORS for Vue frontend
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowVueApp", policy =>
+    options.AddPolicy("AllowAll", policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
+        policy.AllowAnyOrigin()
               .AllowAnyMethod()
               .AllowAnyHeader();
     });
@@ -41,30 +51,18 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    try
+    app.UseSwaggerUI(c =>
     {
-        var context = services.GetRequiredService<GardenContext>();
-        DbInitializer.Initialize(context);
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred seeding the database.");
-    }
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Garden Tracker API v1");
+        c.RoutePrefix = string.Empty;
+    });
 }
 
 app.UseHttpsRedirection();
-app.UseCors("AllowVueApp");
+app.UseCors("AllowAll");
 app.UseAuthorization();
 app.MapControllers();
 
