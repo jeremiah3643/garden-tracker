@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 using GardenTrackerApi.Data;
 using GardenTrackerApi.Models;
-using Npgsql
+using Npgsql;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
