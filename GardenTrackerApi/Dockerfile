@@ -2,12 +2,12 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
-# Copy the project file and restore dependencies
-COPY *.csproj ./
-RUN dotnet restore
+# Copy the csproj and restore as distinct layers
+COPY GardenTrackerApi/GardenTrackerApi.csproj ./
+RUN dotnet restore ./GardenTrackerApi.csproj
 
 # Copy the remaining files and build the app
-COPY . ./
+COPY GardenTrackerApi/ ./
 RUN dotnet publish -c Release -o out
 
 # Use the runtime image for the final image
