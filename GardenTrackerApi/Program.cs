@@ -2,8 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 using GardenTrackerApi.Data;
 using GardenTrackerApi.Models;
+using System.Web;
 using Npgsql;
-
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -20,20 +20,31 @@ builder.Services.AddDbContext<GardenContext>(options =>
     Console.WriteLine($"DATABASE_URL: '{connectionString ?? "null"}'");
     if (string.IsNullOrEmpty(connectionString))
     {
-        connectionString = "Host=localhost;Database=gardentrackerdb;Username=postgres;Password=yourpassword"; // Local fallback
+        Console.WriteLine("DATABASE_URL not found, using local fallback.");
+        connectionString = "Host=localhost;Database=gardentrackerdb;Username=postgres;Password=yourpassword";
     }
     else
     {
         Console.WriteLine("Using Neon DATABASE_URL.");
+        // Parse URI and convert to Npgsql format
+        var uri = new Uri(connectionString);
+        var builder = new NpgsqlConnectionStringBuilder
+        {
+            Host = uri.Host,
+            Database = uri.AbsolutePath.TrimStart('/'),
+            Username = uri.UserInfo.Split(':')[0],
+            Password = uri.UserInfo.Split(':')[1]
+        };
+        // Handle query parameters
+        var queryParams = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        if (queryParams["sslmode"] != null) builder.SslMode = SslMode.Require;
+        if (queryParams["channel_binding"] != null) builder.ChannelBinding = ChannelBinding.Prefer; // Note: ChannelBinding might need adjustment
+        connectionString = builder.ToString();
+        Console.WriteLine($"Parsed connection string: {connectionString}");
     }
     try
     {
-        var npgsqlBuilder = new NpgsqlConnectionStringBuilder(connectionString)
-        {
-            SslMode = SslMode.Require, // Neon requires SSL
-            TrustServerCertificate = true // For local testing with self-signed certs
-        };
-        options.UseNpgsql(npgsqlBuilder.ToString());
+        options.UseNpgsql(connectionString);
     }
     catch (Exception ex)
     {
