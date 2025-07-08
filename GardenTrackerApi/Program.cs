@@ -17,7 +17,14 @@ builder.Services.AddControllers()
 //builder.Services.AddDbContext<GardenContext>(options =>
 //    options.UseSqlite("Data Source=garden.db"));
 builder.Services.AddDbContext<GardenContext>(options =>
-    options.UseNpgsql(Environment.GetEnvironmentVariable("DATABASE_URL") ?? "Host=localhost;Database=gardentrackerdb;Username=postgres;Password=091690"));
+{
+    var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
+    if (string.IsNullOrEmpty(connectionString))
+    {
+        connectionString = "Host=localhost;Database=gardentrackerdb;Username=postgres;Password=yourpassword";
+    }
+    options.UseNpgsql(connectionString);
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
