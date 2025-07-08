@@ -32,7 +32,7 @@ const crops = ref<Crop[]>([]);
 
 const fetchCrops = async () => {
   try {
-    const response = await axios.get('/api/crops');
+    const response = await axios.get('https://garden-tracker.onrender.com/api/crops');
     crops.value = response.data;
   } catch (error) {
     console.error('Error fetching crops:', error);

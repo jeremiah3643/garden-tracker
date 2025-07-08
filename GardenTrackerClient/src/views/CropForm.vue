@@ -33,7 +33,7 @@ const crop = ref({
 
 const addCrop = async () => {
   try {
-    await axios.post('/api/crops', crop.value);
+    await axios.post('https://garden-tracker.onrender.com/api/crops', crop.value);
     router.push('/');
   } catch (error) {
     console.error('Error adding crop:', error);
