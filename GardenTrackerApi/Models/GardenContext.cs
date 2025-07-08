@@ -11,13 +11,5 @@ namespace GardenTrackerApi.Models
 
         public DbSet<Crop> Crops { get; set; }
         public DbSet<Harvest> Harvests { get; set; }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-                optionsBuilder.UseNpgsql("Host=localhost;Database=gardentrackerdb;Username=postgres;Password=091690");
-            }
-        }
     }
 }
