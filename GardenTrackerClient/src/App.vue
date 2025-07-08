@@ -1,5 +1,4 @@
 <template>
-  <div class="bg-blue-500 text-white p-4">Test Tailwind</div>
   <div class="min-h-screen bg-gray-100">
     <nav class="bg-green-600 text-white p-4">
       <div class="container mx-auto flex justify-between">
