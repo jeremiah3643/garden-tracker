@@ -26,25 +26,15 @@ builder.Services.AddDbContext<GardenContext>(options =>
     else
     {
         Console.WriteLine("Using Neon DATABASE_URL.");
-        // Parse URI and convert to Npgsql format
-        var uri = new Uri(connectionString);
-        var builder = new NpgsqlConnectionStringBuilder
-        {
-            Host = uri.Host,
-            Database = uri.AbsolutePath.TrimStart('/'),
-            Username = uri.UserInfo.Split(':')[0],
-            Password = uri.UserInfo.Split(':')[1]
-        };
-        // Handle query parameters
-        var queryParams = System.Web.HttpUtility.ParseQueryString(uri.Query);
-        if (queryParams["sslmode"] != null) builder.SslMode = SslMode.Require;
-        if (queryParams["channel_binding"] != null) builder.ChannelBinding = ChannelBinding.Prefer; // Note: ChannelBinding might need adjustment
-        connectionString = builder.ToString();
-        Console.WriteLine($"Parsed connection string: {connectionString}");
     }
     try
     {
-        options.UseNpgsql(connectionString);
+        var npgsqlBuilder = new NpgsqlConnectionStringBuilder(connectionString)
+        {
+            SslMode = SslMode.Require,
+            TrustServerCertificate = true
+        };
+        options.UseNpgsql(npgsqlBuilder.ToString());
     }
     catch (Exception ex)
     {
@@ -57,11 +47,12 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
+    options.AddPolicy("AllowNetlify", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins("https://guileless-sawine-586d29.netlify.app") // Specific origin
               .AllowAnyMethod()
-              .AllowAnyHeader();
+              .AllowAnyHeader()
+              .AllowCredentials(); // If needed for cookies/auth
     });
 });
 
@@ -78,7 +69,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors("AllowAll");
+app.UseCors("AllowNetlify"); // Apply the specific policy
 app.UseAuthorization();
 app.MapControllers();
 
