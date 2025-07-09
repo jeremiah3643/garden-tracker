@@ -44,7 +44,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowNetlify", policy =>
     {
-        policy.WithOrigins("https://guileless-sawine-586d29.netlify.app")
+        policy.WithOrigins("https://guileless-sawine-586d29.netlify.app", "https://*.netlify.app")
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
