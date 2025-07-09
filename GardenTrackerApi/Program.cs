@@ -29,12 +29,7 @@ builder.Services.AddDbContext<GardenContext>(options =>
     }
     try
     {
-        var npgsqlBuilder = new NpgsqlConnectionStringBuilder(connectionString)
-        {
-            SslMode = SslMode.Require,
-            TrustServerCertificate = true
-        };
-        options.UseNpgsql(npgsqlBuilder.ToString());
+        options.UseNpgsql(connectionString); // Let Npgsql parse the URI directly
     }
     catch (Exception ex)
     {
@@ -49,10 +44,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowNetlify", policy =>
     {
-        policy.WithOrigins("https://guileless-sawine-586d29.netlify.app") // Specific origin
+        policy.WithOrigins("https://guileless-sawine-586d29.netlify.app")
               .AllowAnyMethod()
               .AllowAnyHeader()
-              .AllowCredentials(); // If needed for cookies/auth
+              .AllowCredentials();
     });
 });
 
@@ -69,7 +64,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors("AllowNetlify"); // Apply the specific policy
+app.UseCors("AllowNetlify");
 app.UseAuthorization();
 app.MapControllers();
 
