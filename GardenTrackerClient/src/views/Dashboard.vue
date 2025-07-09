@@ -41,7 +41,7 @@ const fetchCrops = async () => {
 
 const deleteCrop = async (id: number) => {
   try {
-    await axios.delete(`/api/crops/${id}`);
+    await axios.delete(`https://garden-tracker.onrender.com/api/crops/${id}`);
     crops.value = crops.value.filter(crop => crop.id !== id);
   } catch (error) {
     console.error('Error deleting crop:', error);
